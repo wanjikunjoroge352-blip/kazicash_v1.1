@@ -49,3 +49,71 @@
   </script>
 </body>
 </html>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Register - KaziCash</title>
+  <style>
+    body { font-family: Arial, sans-serif; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; background-color: #f4f4f9; }
+    .card { background: white; padding: 2rem; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); width: 100%; max-width: 360px; }
+    h2 { margin-bottom: 1.5rem; text-align: center; color: #333; }
+    input { width: 100%; padding: 0.75rem; margin-bottom: 1rem; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; }
+    button { width: 100%; padding: 0.75rem; background-color: #0070f3; color: white; border: none; border-radius: 4px; font-weight: bold; cursor: pointer; }
+    button:disabled { background-color: #a0c4ff; }
+    .message { margin-top: 1rem; font-size: 0.9rem; text-align: center; }
+    .error { color: red; }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h2>Register for KaziCash</h2>
+    <form id="regForm">
+      <input type="text" id="name" placeholder="Full Name" required />
+      <input type="tel" id="phone" placeholder="Phone Number (e.g. 0712345678)" required />
+      <button type="submit" id="btn">Submit</button>
+    </form>
+    <div id="msg" class="message"></div>
+  </div>
+
+  <script>
+    const form = document.getElementById('regForm');
+    const msg = document.getElementById('msg');
+    const btn = document.getElementById('btn');
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      msg.textContent = '';
+      msg.className = 'message';
+      btn.disabled = true;
+
+      const name = document.getElementById('name').value;
+      const phone = document.getElementById('phone').value;
+
+      try {
+        const res = await fetch('/api/register', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ name, phone })
+        });
+
+        const data = await res.json();
+
+        if (res.ok) {
+          // Redirect to welcome page with user details
+          window.location.href = `/welcome.html?name=${encodeURIComponent(data.user.name)}&id=${data.user.id}`;
+        } else {
+          msg.textContent = data.error;
+          msg.classList.add('error');
+          btn.disabled = false;
+        }
+      } catch (err) {
+        msg.textContent = 'Network error. Please try again.';
+        msg.classList.add('error');
+        btn.disabled = false;
+      }
+    });
+  </script>
+</body>
+</html>
