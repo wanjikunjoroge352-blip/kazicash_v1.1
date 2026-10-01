@@ -28,6 +28,38 @@ app.post('/api/register', async (req, res) => {
 
   res.status(200).json({ message: 'User registered successfully', data });
 });
+// Endpoint to fetch a single user by ID
+app.get('/api/user/:id', async (req, res) => {
+  const { id } = req.params;
+
+  const { data, error } = await supabase
+    .from('users')
+    .select('*')
+    .eq('id', id)
+    .single();
+
+  if (error || !data) {
+    return res.status(404).json({ error: 'User not found' });
+  }
+
+  res.status(200).json(data);
+});
+// Endpoint to fetch a single user by ID
+app.get('/api/user/:id', async (req, res) => {
+  const { id } = req.params;
+
+  const { data, error } = await supabase
+    .from('users')
+    .select('*')
+    .eq('id', id)
+    .single();
+
+  if (error || !data) {
+    return res.status(404).json({ error: 'User not found' });
+  }
+
+  res.status(200).json(data);
+});
 
 app.get('*', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'index.html'));
