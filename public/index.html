@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>KaziCash - Register</title>
+  <style>
+    body { font-family: sans-serif; max-width: 400px; margin: 40px auto; padding: 20px; }
+    form { display: flex; flex-direction: column; gap: 15px; }
+    input, button { padding: 10px; font-size: 16px; }
+    button { background-color: #0070f3; color: white; border: none; cursor: pointer; }
+  </style>
+</head>
+<body>
+  <h2>Register for KaziCash</h2>
+  <form id="registerForm">
+    <input type="text" id="name" placeholder="Full Name" required />
+    <input type="tel" id="phone" placeholder="Phone Number" required />
+    <button type="submit">Submit</button>
+  </form>
+  <p id="message"></p>
+
+  <script>
+    document.getElementById('registerForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const name = document.getElementById('name').value;
+      const phone = document.getElementById('phone').value;
+      const messageEl = document.getElementById('message');
+
+      try {
+        const res = await fetch('/api/register', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ name, phone })
+        });
+        const data = await res.json();
+        if (res.ok) {
+          messageEl.innerText = "Registration successful!";
+          messageEl.style.color = "green";
+        } else {
+          messageEl.innerText = data.error || "Failed to register.";
+          messageEl.style.color = "red";
+        }
+      } catch (err) {
+        messageEl.innerText = "Error connecting to server.";
+        messageEl.style.color = "red";
+      }
+    });
+  </script>
+</body>
+</html>
