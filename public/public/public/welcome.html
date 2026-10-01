@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Welcome to KaziCash</title>
+  <style>
+    body { font-family: Arial, sans-serif; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; background-color: #f4f4f9; }
+    .card { background: white; padding: 2rem; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); text-align: center; max-width: 400px; width: 100%; }
+    .icon { font-size: 3rem; color: #10b981; margin-bottom: 1rem; }
+    h2 { color: #333; margin-bottom: 0.5rem; }
+    p { color: #666; margin-bottom: 1.5rem; }
+    .badge { background: #e0f2fe; color: #0369a1; padding: 0.5rem 1rem; border-radius: 20px; font-weight: bold; display: inline-block; }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <div class="icon">✓</div>
+    <h2 id="greeting">Welcome!</h2>
+    <p>Your KaziCash account registration is complete.</p>
+    <div class="badge" id="userIdBadge">Account ID: Loading...</div>
+  </div>
+
+  <script>
+    const params = new URLSearchParams(window.location.search);
+    const name = params.get('name');
+    const id = params.get('id');
+
+    if (name) {
+      document.getElementById('greeting').textContent = `Welcome, ${name}!`;
+    }
+    if (id) {
+      document.getElementById('userIdBadge').textContent = `Account ID: #${id}`;
+    }
+  </script>
+</body>
+</html>
