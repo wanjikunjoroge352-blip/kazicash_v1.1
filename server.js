@@ -35,6 +35,17 @@ app.post('/api/register', async (req, res) => {
 
     const formattedPhone = formatPhoneNumber(phone);
 
+    // Check if user already exists
+    const { data: existingUser } = await supabase
+      .from('users')
+      .select('*')
+      .eq('phone', formattedPhone)
+      .single();
+
+    if (existingUser) {
+      return res.status(400).json({ error: 'Phone number already registered. Please log in.' });
+    }
+
     const { data, error } = await supabase
       .from('users')
       .insert([{ name, phone: formattedPhone }])
@@ -50,7 +61,34 @@ app.post('/api/register', async (req, res) => {
   }
 });
 
-// 2. Fetch Single User Profile by ID
+// 2. Login Endpoint
+app.post('/api/login', async (req, res) => {
+  try {
+    const { phone } = req.body;
+
+    if (!phone) {
+      return res.status(400).json({ error: 'Phone number is required.' });
+    }
+
+    const formattedPhone = formatPhoneNumber(phone);
+
+    const { data, error } = await supabase
+      .from('users')
+      .select('*')
+      .eq('phone', formattedPhone)
+      .single();
+
+    if (error || !data) {
+      return res.status(404).json({ error: 'Account not found. Please register first.' });
+    }
+
+    return res.status(200).json({ success: true, user: data });
+  } catch (err) {
+    return res.status(500).json({ error: err.message });
+  }
+});
+
+// 3. Fetch Single User Profile by ID
 app.get('/api/user/:id', async (req, res) => {
   try {
     const { id } = req.params;
@@ -70,7 +108,7 @@ app.get('/api/user/:id', async (req, res) => {
   }
 });
 
-// 3. Admin Endpoint: Fetch All Users
+// 4. Admin Endpoint: Fetch All Users
 app.get('/api/admin/users', async (req, res) => {
   try {
     const { data, error } = await supabase
