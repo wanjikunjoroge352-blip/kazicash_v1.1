@@ -4,18 +4,19 @@ const { createClient } = require('@supabase/supabase-js');
 const path = require('path');
 
 const app = express();
-app.use(express.json());
-app.use(express.static(path.join(__dirname, 'public')));
 
-// Lines 10–16: Direct Supabase Client Initialization
-// Replace these two values with your actual keys from Supabase Settings -> API
-const supabaseUrl =https://najyoucexukhiuihntjh.supabase.co/rest/v1/
-const supabaseSecretKey =eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5hanlvdWNleHVraGl1aWhudGpoIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc5MDc2MTk2OCwiZXhwIjoyMTA2MzM3OTY4fQ.WvgUXI_xUIH_M-acPMapF79RmAtcp--bZYtpbsgrJMQ
-const supabase = createClient(supabaseUrl, supabaseSecretKey);
+app.use(express.json());
+app.use(express.static(path.join(process.cwd(), 'public')));
+
+// Supabase Credentials
+const supabaseUrl = https://najyoucexukhiuihntjh.supabase.co/rest/v1/
+const supabaseSecretKey = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5hanlvdWNleHVraGl1aWhudGpoIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc5MDc2MTk2OCwiZXhwIjoyMTA2MzM3OTY4fQ.WvgUXI_xUIH_M-acPMapF79RmAtcp--bZYtpbsgrJMQ
+
+const supabase = createClient(https://najyoucexukhiuihntjh.supabase.co/rest/v1/, eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5hanlvdWNleHVraGl1aWhudGpoIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc5MDc2MTk2OCwiZXhwIjoyMTA2MzM3OTY4fQ.WvgUXI_xUIH_M-acPMapF79RmAtcp--bZYtpbsgrJMQ);
 
 // Helper: Standardize Kenyan Phone Numbers (+254...)
 function formatPhoneNumber(phone) {
-  let cleaned = phone.replace(/\D/g, ''); // remove non-digits
+  let cleaned = phone.replace(/\D/g, '');
   if (cleaned.startsWith('0')) {
     cleaned = '254' + cleaned.substring(1);
   } else if (cleaned.startsWith('7') || cleaned.startsWith('1')) {
@@ -24,7 +25,7 @@ function formatPhoneNumber(phone) {
   return '+' + cleaned;
 }
 
-// 1. Registration Endpoint with Phone Formatting
+// 1. Registration Endpoint
 app.post('/api/register', async (req, res) => {
   const { name, phone } = req.body;
 
@@ -32,10 +33,8 @@ app.post('/api/register', async (req, res) => {
     return res.status(400).json({ error: 'Name and phone number are required.' });
   }
 
-  // Format phone number to +254...
   const formattedPhone = formatPhoneNumber(phone);
 
-  // Save to Supabase 'users' table
   const { data, error } = await supabase
     .from('users')
     .insert([{ name, phone: formattedPhone }])
@@ -45,7 +44,6 @@ app.post('/api/register', async (req, res) => {
     return res.status(400).json({ error: error.message });
   }
 
-  // Send back registered user object (contains id, name, phone)
   res.status(200).json({ success: true, user: data[0] });
 });
 
@@ -65,7 +63,7 @@ app.get('/api/user/:id', async (req, res) => {
   res.status(200).json(data);
 });
 
-// 3. Admin Endpoint: Fetch All Registered Users
+// 3. Admin Endpoint: Fetch All Users
 app.get('/api/admin/users', async (req, res) => {
   const { data, error } = await supabase
     .from('users')
@@ -79,14 +77,10 @@ app.get('/api/admin/users', async (req, res) => {
   res.status(200).json(data);
 });
 
-// Fallback to Serve Frontend
+// Serve frontend index.html
 app.get('*', (req, res) => {
-  res.sendFile(path.join(__dirname, 'public', 'index.html'));
+  res.sendFile(path.join(process.cwd(), 'public', 'index.html'));
 });
 
-const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
-});
-
-  
+// Export Express app for Vercel
+module.exports = app;
