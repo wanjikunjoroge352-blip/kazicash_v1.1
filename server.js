@@ -7,8 +7,8 @@ const app = express();
 app.use(express.json());
 app.use(express.static(path.join(process.cwd(), 'public')));
 
-// Supabase Credentials
-const supabaseUrl = 'https://kptjnyasndijikuxcmlm.supabase.co';
+// Supabase Credentials (Hardcoded for direct Vercel execution)
+const supabaseUrl = 'https://najyoucexukhiuihntjh.supabase.co';
 const supabaseSecretKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5hanlvdWNleHVraGl1aWhudGpoIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc5MDc2MTk2OCwiZXhwIjoyMTA2MzM3OTY4fQ.WvgUXI_xUIH_M-acPMapF79RmAtcp--bZYtpbsgrJMQ';
 
 const supabase = createClient(supabaseUrl, supabaseSecretKey);
@@ -93,4 +93,5 @@ app.get('*', (req, res) => {
   res.sendFile(path.join(process.cwd(), 'public', 'index.html'));
 });
 
+// Export Express app for Vercel execution
 module.exports = app;
