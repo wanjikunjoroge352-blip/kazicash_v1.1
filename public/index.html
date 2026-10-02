@@ -3,38 +3,86 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Register - KaziCash</title>
+  <title>KaziCash</title>
   <style>
-    body { font-family: Arial, sans-serif; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; background-color: #f4f4f9; }
-    .card { background: white; padding: 2rem; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); width: 100%; max-width: 360px; }
-    h2 { margin-bottom: 1.5rem; text-align: center; color: #333; }
-    input { width: 100%; padding: 0.75rem; margin-bottom: 1rem; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; }
-    button { width: 100%; padding: 0.75rem; background-color: #0070f3; color: white; border: none; border-radius: 4px; font-weight: bold; cursor: pointer; }
-    button:disabled { background-color: #a0c4ff; }
-    .message { margin-top: 1rem; font-size: 0.9rem; text-align: center; }
-    .error { color: red; }
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+    body { background-color: #f4f6f8; display: flex; justify-content: center; align-items: center; min-height: 100vh; padding: 16px; }
+    .card { background: #ffffff; padding: 32px 24px; border-radius: 16px; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05); width: 100%; max-width: 400px; text-align: center; }
+    h2 { font-size: 24px; color: #1a1a1a; margin-bottom: 20px; }
+    .input-group { margin-bottom: 16px; text-align: left; }
+    input { width: 100%; padding: 14px; border: 1px solid #e1e4e8; border-radius: 8px; font-size: 16px; outline: none; }
+    input:focus { border-color: #0066ff; }
+    button { width: 100%; padding: 14px; background: #0066ff; color: #fff; border: none; border-radius: 8px; font-size: 16px; font-weight: 600; cursor: pointer; }
+    button:disabled { opacity: 0.6; }
+    .error { color: #dc3545; font-size: 14px; margin-top: 12px; }
+    .checkmark { color: #10b981; font-size: 48px; margin-bottom: 12px; }
+    .badge { display: inline-block; background: #e0f2fe; color: #0369a1; font-weight: 600; padding: 8px 16px; border-radius: 20px; margin-top: 16px; font-size: 14px; }
+    .dashboard { display: none; text-align: left; }
+    .dash-header { border-bottom: 1px solid #e1e4e8; padding-bottom: 16px; margin-bottom: 16px; }
+    .dash-item { display: flex; justify-content: space-between; margin-bottom: 12px; font-size: 15px; }
+    .dash-label { color: #666; }
+    .dash-value { font-weight: 600; color: #1a1a1a; }
   </style>
 </head>
 <body>
-  <div class="card">
-    <h2>Register for KaziCash</h2>
-    <form id="regForm">
-      <input type="text" id="name" placeholder="Full Name" required />
-      <input type="tel" id="phone" placeholder="Phone Number (e.g. 0712345678)" required />
-      <button type="submit" id="btn">Submit</button>
-    </form>
-    <div id="msg" class="message"></div>
+
+  <div class="card" id="appCard">
+    <!-- Registration Form -->
+    <div id="registerView">
+      <h2>Register for KaziCash</h2>
+      <form id="regForm">
+        <div class="input-group">
+          <input type="text" id="name" placeholder="Full Name" required>
+        </div>
+        <div class="input-group">
+          <input type="tel" id="phone" placeholder="Phone Number (e.g. 0712345678)" required>
+        </div>
+        <button type="submit" id="submitBtn">Submit</button>
+      </form>
+      <div id="errorMsg" class="error"></div>
+    </div>
+
+    <!-- Success Screen -->
+    <div id="successView" style="display: none;">
+      <div class="checkmark">✓</div>
+      <h2 id="welcomeText">Welcome!</h2>
+      <p style="color: #666;">Your KaziCash account registration is complete.</p>
+      <div class="badge" id="accountIdBadge">Account ID: #--</div>
+      <p style="margin-top: 16px; font-size: 12px; color: #888;">Loading your dashboard...</p>
+    </div>
+
+    <!-- User Dashboard View -->
+    <div id="dashboardView" class="dashboard">
+      <div class="dash-header">
+        <h2 id="dashWelcome" style="margin-bottom: 4px;">Dashboard</h2>
+        <span style="font-size: 13px; color: #10b981; font-weight: 600;">● Active Account</span>
+      </div>
+      <div class="dash-item">
+        <span class="dash-label">Account ID:</span>
+        <span class="dash-value" id="dashId">#--</span>
+      </div>
+      <div class="dash-item">
+        <span class="dash-label">Phone:</span>
+        <span class="dash-value" id="dashPhone">--</span>
+      </div>
+      <div class="dash-item">
+        <span class="dash-label">Status:</span>
+        <span class="dash-value" style="color: #10b981;">Verified</span>
+      </div>
+      <button onclick="location.reload()" style="margin-top: 20px; background: #f4f6f8; color: #333;">Sign Out</button>
+    </div>
   </div>
 
   <script>
-    const form = document.getElementById('regForm');
-    const msg = document.getElementById('msg');
-    const btn = document.getElementById('btn');
+    const regForm = document.getElementById('regForm');
+    const submitBtn = document.getElementById('submitBtn');
+    const errorMsg = document.getElementById('errorMsg');
 
-    form.addEventListener('submit', async (e) => {
+    regForm.addEventListener('submit', async (e) => {
       e.preventDefault();
-      msg.textContent = '';
-      btn.disabled = true;
+      errorMsg.textContent = '';
+      submitBtn.disabled = true;
+      submitBtn.textContent = 'Processing...';
 
       const name = document.getElementById('name').value;
       const phone = document.getElementById('phone').value;
@@ -48,19 +96,29 @@
 
         const data = await res.json();
 
-        if (res.ok) {
-          // THIS IS THE REDIRECT LINE:
-          // It forces the web browser to immediately jump to welcome.html
-          window.location.href = `/welcome.html?name=${encodeURIComponent(data.user.name)}&id=${data.user.id}`;
-        } else {
-          msg.textContent = data.error;
-          msg.classList.add('error');
-          btn.disabled = false;
+        if (!res.ok) {
+          throw new Error(data.error || 'Registration failed');
         }
+
+        // Show Success View
+        document.getElementById('registerView').style.display = 'none';
+        document.getElementById('successView').style.display = 'block';
+        document.getElementById('welcomeText').textContent = `Welcome, ${data.user.name}!`;
+        document.getElementById('accountIdBadge').textContent = `Account ID: #${data.user.id}`;
+
+        // Auto-redirect to Dashboard after 2 seconds
+        setTimeout(() => {
+          document.getElementById('successView').style.display = 'none';
+          document.getElementById('dashboardView').style.display = 'block';
+          document.getElementById('dashWelcome').textContent = `Hi, ${data.user.name}`;
+          document.getElementById('dashId').textContent = `#${data.user.id}`;
+          document.getElementById('dashPhone').textContent = data.user.phone;
+        }, 2000);
+
       } catch (err) {
-        msg.textContent = 'Network error. Please try again.';
-        msg.classList.add('error');
-        btn.disabled = false;
+        errorMsg.textContent = err.message;
+        submitBtn.disabled = false;
+        submitBtn.textContent = 'Submit';
       }
     });
   </script>
