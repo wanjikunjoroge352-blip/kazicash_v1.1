@@ -1,4 +1,3 @@
-
 const express = require('express');
 const { createClient } = require('@supabase/supabase-js');
 const path = require('path');
@@ -9,10 +8,10 @@ app.use(express.json());
 app.use(express.static(path.join(process.cwd(), 'public')));
 
 // Supabase Credentials
-const supabaseUrl = https://najyoucexukhiuihntjh.supabase.co/rest/v1/
-const supabaseSecretKey = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5hanlvdWNleHVraGl1aWhudGpoIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc5MDc2MTk2OCwiZXhwIjoyMTA2MzM3OTY4fQ.WvgUXI_xUIH_M-acPMapF79RmAtcp--bZYtpbsgrJMQ
+const supabaseUrl = 'https://kptjnyasndijikuxcmlm.supabase.co';
+const supabaseSecretKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5hanlvdWNleHVraGl1aWhudGpoIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc5MDc2MTk2OCwiZXhwIjoyMTA2MzM3OTY4fQ.WvgUXI_xUIH_M-acPMapF79RmAtcp--bZYtpbsgrJMQ';
 
-const supabase = createClient(https://najyoucexukhiuihntjh.supabase.co/rest/v1/, eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5hanlvdWNleHVraGl1aWhudGpoIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc5MDc2MTk2OCwiZXhwIjoyMTA2MzM3OTY4fQ.WvgUXI_xUIH_M-acPMapF79RmAtcp--bZYtpbsgrJMQ);
+const supabase = createClient(supabaseUrl, supabaseSecretKey);
 
 // Helper: Standardize Kenyan Phone Numbers (+254...)
 function formatPhoneNumber(phone) {
@@ -27,54 +26,66 @@ function formatPhoneNumber(phone) {
 
 // 1. Registration Endpoint
 app.post('/api/register', async (req, res) => {
-  const { name, phone } = req.body;
+  try {
+    const { name, phone } = req.body;
 
-  if (!name || !phone) {
-    return res.status(400).json({ error: 'Name and phone number are required.' });
+    if (!name || !phone) {
+      return res.status(400).json({ error: 'Name and phone number are required.' });
+    }
+
+    const formattedPhone = formatPhoneNumber(phone);
+
+    const { data, error } = await supabase
+      .from('users')
+      .insert([{ name, phone: formattedPhone }])
+      .select();
+
+    if (error) {
+      return res.status(400).json({ error: error.message });
+    }
+
+    return res.status(200).json({ success: true, user: data[0] });
+  } catch (err) {
+    return res.status(500).json({ error: err.message });
   }
-
-  const formattedPhone = formatPhoneNumber(phone);
-
-  const { data, error } = await supabase
-    .from('users')
-    .insert([{ name, phone: formattedPhone }])
-    .select();
-
-  if (error) {
-    return res.status(400).json({ error: error.message });
-  }
-
-  res.status(200).json({ success: true, user: data[0] });
 });
 
 // 2. Fetch Single User by ID
 app.get('/api/user/:id', async (req, res) => {
-  const { id } = req.params;
-  const { data, error } = await supabase
-    .from('users')
-    .select('*')
-    .eq('id', id)
-    .single();
+  try {
+    const { id } = req.params;
+    const { data, error } = await supabase
+      .from('users')
+      .select('*')
+      .eq('id', id)
+      .single();
 
-  if (error || !data) {
-    return res.status(404).json({ error: 'User not found' });
+    if (error || !data) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+
+    return res.status(200).json(data);
+  } catch (err) {
+    return res.status(500).json({ error: err.message });
   }
-
-  res.status(200).json(data);
 });
 
 // 3. Admin Endpoint: Fetch All Users
 app.get('/api/admin/users', async (req, res) => {
-  const { data, error } = await supabase
-    .from('users')
-    .select('*')
-    .order('created_at', { ascending: false });
+  try {
+    const { data, error } = await supabase
+      .from('users')
+      .select('*')
+      .order('created_at', { ascending: false });
 
-  if (error) {
-    return res.status(400).json({ error: error.message });
+    if (error) {
+      return res.status(400).json({ error: error.message });
+    }
+
+    return res.status(200).json(data);
+  } catch (err) {
+    return res.status(500).json({ error: err.message });
   }
-
-  res.status(200).json(data);
 });
 
 // Serve frontend index.html
@@ -82,5 +93,4 @@ app.get('*', (req, res) => {
   res.sendFile(path.join(process.cwd(), 'public', 'index.html'));
 });
 
-// Export Express app for Vercel
 module.exports = app;
