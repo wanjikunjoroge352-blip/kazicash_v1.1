@@ -7,43 +7,42 @@
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
     body { background-color: #f4f6f8; display: flex; justify-content: center; align-items: center; min-height: 100vh; padding: 16px; }
-    .card { background: #ffffff; padding: 32px 24px; border-radius: 16px; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05); width: 100%; max-width: 400px; text-align: center; }
+    .card { background: #ffffff; padding: 28px 20px; border-radius: 16px; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05); width: 100%; max-width: 420px; text-align: center; }
     .tabs { display: flex; margin-bottom: 20px; border-bottom: 2px solid #f4f6f8; }
     .tab-btn { flex: 1; padding: 10px; background: none; border: none; font-size: 16px; font-weight: 600; color: #888; cursor: pointer; }
     .tab-btn.active { color: #0066ff; border-bottom: 2px solid #0066ff; }
-    h2 { font-size: 22px; color: #1a1a1a; margin-bottom: 20px; }
+    h2 { font-size: 22px; color: #1a1a1a; margin-bottom: 16px; }
     .input-group { margin-bottom: 16px; text-align: left; }
     input { width: 100%; padding: 14px; border: 1px solid #e1e4e8; border-radius: 8px; font-size: 16px; outline: none; }
     input:focus { border-color: #0066ff; }
     .btn-primary { width: 100%; padding: 14px; background: #0066ff; color: #fff; border: none; border-radius: 8px; font-size: 16px; font-weight: 600; cursor: pointer; }
     .btn-primary:disabled { opacity: 0.6; }
     .error { color: #dc3545; font-size: 14px; margin-top: 12px; }
-    .checkmark { color: #10b981; font-size: 48px; margin-bottom: 12px; }
-    .badge { display: inline-block; background: #e0f2fe; color: #0369a1; font-weight: 600; padding: 8px 16px; border-radius: 20px; margin-top: 16px; font-size: 14px; }
     
-    /* Dashboard Styles */
+    /* Dashboard & Tasks */
     .dashboard { display: none; text-align: left; }
-    .dash-header { border-bottom: 1px solid #e1e4e8; padding-bottom: 16px; margin-bottom: 16px; }
-    .balance-card { background: #0066ff; color: white; padding: 20px; border-radius: 12px; margin-bottom: 20px; }
+    .dash-header { border-bottom: 1px solid #e1e4e8; padding-bottom: 12px; margin-bottom: 16px; display: flex; justify-content: space-between; align-items: center; }
+    .balance-card { background: linear-gradient(135deg, #0066ff, #0044cc); color: white; padding: 20px; border-radius: 12px; margin-bottom: 20px; }
     .balance-amount { font-size: 28px; font-weight: 700; margin-top: 4px; }
-    .dash-item { display: flex; justify-content: space-between; margin-bottom: 12px; font-size: 15px; }
-    .dash-label { color: #666; }
-    .dash-value { font-weight: 600; color: #1a1a1a; }
-    .action-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 20px; }
-    .action-btn { padding: 12px; background: #f4f6f8; border: none; border-radius: 8px; font-weight: 600; color: #333; cursor: pointer; }
+    .section-title { font-size: 16px; font-weight: 700; color: #1a1a1a; margin-bottom: 12px; }
+    .task-card { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 10px; padding: 14px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; }
+    .task-info h4 { font-size: 14px; color: #1e293b; margin-bottom: 2px; }
+    .task-info p { font-size: 12px; color: #64748b; }
+    .task-reward { font-weight: 700; color: #10b981; font-size: 14px; }
+    .btn-task { padding: 8px 14px; background: #10b981; color: white; border: none; border-radius: 6px; font-size: 13px; font-weight: 600; cursor: pointer; }
+    .action-btn { padding: 12px; background: #fee2e2; color: #dc3545; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; width: 100%; margin-top: 16px; }
   </style>
 </head>
 <body>
 
-  <div class="card" id="appCard">
-    <!-- Auth Section (Tabs + Forms) -->
+  <div class="card">
+    <!-- Auth Section -->
     <div id="authSection">
       <div class="tabs">
         <button class="tab-btn active" id="tabRegister" onclick="switchTab('register')">Register</button>
         <button class="tab-btn" id="tabLogin" onclick="switchTab('login')">Login</button>
       </div>
 
-      <!-- Registration Form -->
       <div id="registerView">
         <form id="regForm">
           <div class="input-group">
@@ -56,7 +55,6 @@
         </form>
       </div>
 
-      <!-- Login Form -->
       <div id="loginView" style="display: none;">
         <form id="loginForm">
           <div class="input-group">
@@ -69,55 +67,62 @@
       <div id="authErrorMsg" class="error"></div>
     </div>
 
-    <!-- Success Screen -->
-    <div id="successView" style="display: none;">
-      <div class="checkmark">✓</div>
-      <h2 id="welcomeText">Welcome!</h2>
-      <p style="color: #666;">Account authenticated successfully.</p>
-      <div class="badge" id="accountIdBadge">Account ID: #--</div>
-      <p style="margin-top: 16px; font-size: 12px; color: #888;">Opening dashboard...</p>
-    </div>
-
-    <!-- User Dashboard View -->
+    <!-- Dashboard View -->
     <div id="dashboardView" class="dashboard">
       <div class="dash-header">
-        <h2 id="dashWelcome" style="margin-bottom: 4px;">Dashboard</h2>
-        <span style="font-size: 13px; color: #10b981; font-weight: 600;">● Active Account</span>
+        <div>
+          <h2 id="dashWelcome" style="margin: 0; font-size: 18px;">Hi, User</h2>
+          <span style="font-size: 12px; color: #10b981; font-weight: 600;">● Active Account</span>
+        </div>
+        <span id="dashId" style="font-size: 13px; font-weight: 600; color: #64748b;">#--</span>
       </div>
 
       <div class="balance-card">
         <div style="font-size: 13px; opacity: 0.9;">Available Balance</div>
-        <div class="balance-amount">KES 0.00</div>
+        <div class="balance-amount" id="dashBalance">KES 0.00</div>
       </div>
 
-      <div class="action-grid">
-        <button class="action-btn" onclick="alert('Deposit feature coming soon!')">Deposit</button>
-        <button class="action-btn" onclick="alert('Withdraw feature coming soon!')">Withdraw</button>
+      <div class="section-title">Available Money Tasks</div>
+
+      <!-- Task 1: Micro Survey -->
+      <div class="task-card">
+        <div class="task-info">
+          <h4>Market Opinion Survey</h4>
+          <p>Takes ~3 mins (CPALead)</p>
+        </div>
+        <button class="btn-task" onclick="completeTask(15, 'Market Survey')">+ KES 15</button>
       </div>
 
-      <div class="dash-item">
-        <span class="dash-label">Account ID:</span>
-        <span class="dash-value" id="dashId">#--</span>
-      </div>
-      <div class="dash-item">
-        <span class="dash-label">Phone:</span>
-        <span class="dash-value" id="dashPhone">--</span>
-      </div>
-      <div class="dash-item">
-        <span class="dash-label">Status:</span>
-        <span class="dash-value" style="color: #10b981;">Verified</span>
+      <!-- Task 2: Rewarded Video -->
+      <div class="task-card">
+        <div class="task-info">
+          <h4>Watch Partner Video</h4>
+          <p>30-second ad view</p>
+        </div>
+        <button class="btn-task" onclick="completeTask(5, 'Video Ad')">+ KES 5</button>
       </div>
 
-      <button onclick="logout()" class="action-btn" style="width: 100%; margin-top: 16px; background: #fee2e2; color: #dc3545;">Sign Out</button>
+      <!-- Task 3: Referral Bonus -->
+      <div class="task-card">
+        <div class="task-info">
+          <h4>Invite a Friend</h4>
+          <p>Share your code</p>
+        </div>
+        <button class="btn-task" onclick="completeTask(20, 'Referral Bonus')">+ KES 20</button>
+      </div>
+
+      <button onclick="logout()" class="action-btn">Sign Out</button>
     </div>
   </div>
 
   <script>
-    // Check session on load
+    let currentUser = null;
+
     window.addEventListener('DOMContentLoaded', () => {
       const savedUser = localStorage.getItem('kaziUser');
       if (savedUser) {
-        showDashboard(JSON.parse(savedUser));
+        currentUser = JSON.parse(savedUser);
+        showDashboard(currentUser);
       }
     });
 
@@ -136,7 +141,6 @@
       }
     }
 
-    // Register Handler
     document.getElementById('regForm').addEventListener('submit', async (e) => {
       e.preventDefault();
       handleAuth('/api/register', {
@@ -145,7 +149,6 @@
       }, 'regSubmitBtn');
     });
 
-    // Login Handler
     document.getElementById('loginForm').addEventListener('submit', async (e) => {
       e.preventDefault();
       handleAuth('/api/login', {
@@ -167,23 +170,11 @@
         });
 
         const data = await res.json();
+        if (!res.ok) throw new Error(data.error || 'Authentication failed');
 
-        if (!res.ok) {
-          throw new Error(data.error || 'Authentication failed');
-        }
-
-        // Save session
-        localStorage.setItem('kaziUser', JSON.stringify(data.user));
-
-        // Show Success View
-        document.getElementById('authSection').style.display = 'none';
-        document.getElementById('successView').style.display = 'block';
-        document.getElementById('welcomeText').textContent = `Welcome, ${data.user.name}!`;
-        document.getElementById('accountIdBadge').textContent = `Account ID: #${data.user.id}`;
-
-        setTimeout(() => {
-          showDashboard(data.user);
-        }, 1500);
+        currentUser = data.user;
+        localStorage.setItem('kaziUser', JSON.stringify(currentUser));
+        showDashboard(currentUser);
 
       } catch (err) {
         errorMsg.textContent = err.message;
@@ -193,12 +184,24 @@
 
     function showDashboard(user) {
       document.getElementById('authSection').style.display = 'none';
-      document.getElementById('successView').style.display = 'none';
       document.getElementById('dashboardView').style.display = 'block';
-
       document.getElementById('dashWelcome').textContent = `Hi, ${user.name}`;
       document.getElementById('dashId').textContent = `#${user.id}`;
-      document.getElementById('dashPhone').textContent = user.phone;
+      
+      const currentBalance = localStorage.getItem(`balance_${user.id}`) || '0.00';
+      document.getElementById('dashBalance').textContent = `KES ${parseFloat(currentBalance).toFixed(2)}`;
+    }
+
+    function completeTask(amount, taskName) {
+      if (!currentUser) return;
+      
+      let currentBalance = parseFloat(localStorage.getItem(`balance_${currentUser.id}`) || '0');
+      let newBalance = currentBalance + amount;
+      
+      localStorage.setItem(`balance_${currentUser.id}`, newBalance);
+      document.getElementById('dashBalance').textContent = `KES ${newBalance.toFixed(2)}`;
+      
+      alert(`🎉 Task Completed: "${taskName}"!\nKES ${amount}.00 added to your balance.`);
     }
 
     function logout() {
