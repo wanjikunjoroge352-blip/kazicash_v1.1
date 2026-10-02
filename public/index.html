@@ -1,134 +1,210 @@
-const express = require('express');
-const { createClient } = require('@supabase/supabase-js');
-const path = require('path');
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>KaziCash</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+    body { background-color: #f4f6f8; display: flex; justify-content: center; align-items: center; min-height: 100vh; padding: 16px; }
+    .card { background: #ffffff; padding: 32px 24px; border-radius: 16px; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05); width: 100%; max-width: 400px; text-align: center; }
+    .tabs { display: flex; margin-bottom: 20px; border-bottom: 2px solid #f4f6f8; }
+    .tab-btn { flex: 1; padding: 10px; background: none; border: none; font-size: 16px; font-weight: 600; color: #888; cursor: pointer; }
+    .tab-btn.active { color: #0066ff; border-bottom: 2px solid #0066ff; }
+    h2 { font-size: 22px; color: #1a1a1a; margin-bottom: 20px; }
+    .input-group { margin-bottom: 16px; text-align: left; }
+    input { width: 100%; padding: 14px; border: 1px solid #e1e4e8; border-radius: 8px; font-size: 16px; outline: none; }
+    input:focus { border-color: #0066ff; }
+    .btn-primary { width: 100%; padding: 14px; background: #0066ff; color: #fff; border: none; border-radius: 8px; font-size: 16px; font-weight: 600; cursor: pointer; }
+    .btn-primary:disabled { opacity: 0.6; }
+    .error { color: #dc3545; font-size: 14px; margin-top: 12px; }
+    .checkmark { color: #10b981; font-size: 48px; margin-bottom: 12px; }
+    .badge { display: inline-block; background: #e0f2fe; color: #0369a1; font-weight: 600; padding: 8px 16px; border-radius: 20px; margin-top: 16px; font-size: 14px; }
+    
+    /* Dashboard Styles */
+    .dashboard { display: none; text-align: left; }
+    .dash-header { border-bottom: 1px solid #e1e4e8; padding-bottom: 16px; margin-bottom: 16px; }
+    .balance-card { background: #0066ff; color: white; padding: 20px; border-radius: 12px; margin-bottom: 20px; }
+    .balance-amount { font-size: 28px; font-weight: 700; margin-top: 4px; }
+    .dash-item { display: flex; justify-content: space-between; margin-bottom: 12px; font-size: 15px; }
+    .dash-label { color: #666; }
+    .dash-value { font-weight: 600; color: #1a1a1a; }
+    .action-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 20px; }
+    .action-btn { padding: 12px; background: #f4f6f8; border: none; border-radius: 8px; font-weight: 600; color: #333; cursor: pointer; }
+  </style>
+</head>
+<body>
 
-const app = express();
+  <div class="card" id="appCard">
+    <!-- Auth Section (Tabs + Forms) -->
+    <div id="authSection">
+      <div class="tabs">
+        <button class="tab-btn active" id="tabRegister" onclick="switchTab('register')">Register</button>
+        <button class="tab-btn" id="tabLogin" onclick="switchTab('login')">Login</button>
+      </div>
 
-app.use(express.json());
-app.use(express.static(path.join(process.cwd(), 'public')));
+      <!-- Registration Form -->
+      <div id="registerView">
+        <form id="regForm">
+          <div class="input-group">
+            <input type="text" id="regName" placeholder="Full Name" required>
+          </div>
+          <div class="input-group">
+            <input type="tel" id="regPhone" placeholder="Phone Number (e.g. 0712345678)" required>
+          </div>
+          <button type="submit" class="btn-primary" id="regSubmitBtn">Register</button>
+        </form>
+      </div>
 
-// Direct Supabase Credentials
-const supabaseUrl = 'https://najyoucexukhiuihntjh.supabase.co';
-const supabaseSecretKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5hanlvdWNleHVraGl1aWhudGpoIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc5MDc2MTk2OCwiZXhwIjoyMTA2MzM3OTY4fQ.WvgUXI_xUIH_M-acPMapF79RmAtcp--bZYtpbsgrJMQ';
+      <!-- Login Form -->
+      <div id="loginView" style="display: none;">
+        <form id="loginForm">
+          <div class="input-group">
+            <input type="tel" id="loginPhone" placeholder="Phone Number (e.g. 0712345678)" required>
+          </div>
+          <button type="submit" class="btn-primary" id="loginSubmitBtn">Log In</button>
+        </form>
+      </div>
 
-const supabase = createClient(supabaseUrl, supabaseSecretKey);
+      <div id="authErrorMsg" class="error"></div>
+    </div>
 
-// Helper: Standardize Kenyan Phone Numbers (+254...)
-function formatPhoneNumber(phone) {
-  let cleaned = phone.replace(/\D/g, '');
-  if (cleaned.startsWith('0')) {
-    cleaned = '254' + cleaned.substring(1);
-  } else if (cleaned.startsWith('7') || cleaned.startsWith('1')) {
-    cleaned = '254' + cleaned;
-  }
-  return '+' + cleaned;
-}
+    <!-- Success Screen -->
+    <div id="successView" style="display: none;">
+      <div class="checkmark">✓</div>
+      <h2 id="welcomeText">Welcome!</h2>
+      <p style="color: #666;">Account authenticated successfully.</p>
+      <div class="badge" id="accountIdBadge">Account ID: #--</div>
+      <p style="margin-top: 16px; font-size: 12px; color: #888;">Opening dashboard...</p>
+    </div>
 
-// 1. Registration Endpoint
-app.post('/api/register', async (req, res) => {
-  try {
-    const { name, phone } = req.body;
+    <!-- User Dashboard View -->
+    <div id="dashboardView" class="dashboard">
+      <div class="dash-header">
+        <h2 id="dashWelcome" style="margin-bottom: 4px;">Dashboard</h2>
+        <span style="font-size: 13px; color: #10b981; font-weight: 600;">● Active Account</span>
+      </div>
 
-    if (!name || !phone) {
-      return res.status(400).json({ error: 'Name and phone number are required.' });
+      <div class="balance-card">
+        <div style="font-size: 13px; opacity: 0.9;">Available Balance</div>
+        <div class="balance-amount">KES 0.00</div>
+      </div>
+
+      <div class="action-grid">
+        <button class="action-btn" onclick="alert('Deposit feature coming soon!')">Deposit</button>
+        <button class="action-btn" onclick="alert('Withdraw feature coming soon!')">Withdraw</button>
+      </div>
+
+      <div class="dash-item">
+        <span class="dash-label">Account ID:</span>
+        <span class="dash-value" id="dashId">#--</span>
+      </div>
+      <div class="dash-item">
+        <span class="dash-label">Phone:</span>
+        <span class="dash-value" id="dashPhone">--</span>
+      </div>
+      <div class="dash-item">
+        <span class="dash-label">Status:</span>
+        <span class="dash-value" style="color: #10b981;">Verified</span>
+      </div>
+
+      <button onclick="logout()" class="action-btn" style="width: 100%; margin-top: 16px; background: #fee2e2; color: #dc3545;">Sign Out</button>
+    </div>
+  </div>
+
+  <script>
+    // Check session on load
+    window.addEventListener('DOMContentLoaded', () => {
+      const savedUser = localStorage.getItem('kaziUser');
+      if (savedUser) {
+        showDashboard(JSON.parse(savedUser));
+      }
+    });
+
+    function switchTab(tab) {
+      document.getElementById('authErrorMsg').textContent = '';
+      if (tab === 'register') {
+        document.getElementById('tabRegister').classList.add('active');
+        document.getElementById('tabLogin').classList.remove('active');
+        document.getElementById('registerView').style.display = 'block';
+        document.getElementById('loginView').style.display = 'none';
+      } else {
+        document.getElementById('tabLogin').classList.add('active');
+        document.getElementById('tabRegister').classList.remove('active');
+        document.getElementById('loginView').style.display = 'block';
+        document.getElementById('registerView').style.display = 'none';
+      }
     }
 
-    const formattedPhone = formatPhoneNumber(phone);
+    // Register Handler
+    document.getElementById('regForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      handleAuth('/api/register', {
+        name: document.getElementById('regName').value,
+        phone: document.getElementById('regPhone').value
+      }, 'regSubmitBtn');
+    });
 
-    // Check if user already exists
-    const { data: existingUser } = await supabase
-      .from('users')
-      .select('*')
-      .eq('phone', formattedPhone)
-      .single();
+    // Login Handler
+    document.getElementById('loginForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      handleAuth('/api/login', {
+        phone: document.getElementById('loginPhone').value
+      }, 'loginSubmitBtn');
+    });
 
-    if (existingUser) {
-      return res.status(400).json({ error: 'Phone number already registered. Please log in.' });
+    async function handleAuth(url, bodyData, btnId) {
+      const errorMsg = document.getElementById('authErrorMsg');
+      const btn = document.getElementById(btnId);
+      errorMsg.textContent = '';
+      btn.disabled = true;
+
+      try {
+        const res = await fetch(url, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(bodyData)
+        });
+
+        const data = await res.json();
+
+        if (!res.ok) {
+          throw new Error(data.error || 'Authentication failed');
+        }
+
+        // Save session
+        localStorage.setItem('kaziUser', JSON.stringify(data.user));
+
+        // Show Success View
+        document.getElementById('authSection').style.display = 'none';
+        document.getElementById('successView').style.display = 'block';
+        document.getElementById('welcomeText').textContent = `Welcome, ${data.user.name}!`;
+        document.getElementById('accountIdBadge').textContent = `Account ID: #${data.user.id}`;
+
+        setTimeout(() => {
+          showDashboard(data.user);
+        }, 1500);
+
+      } catch (err) {
+        errorMsg.textContent = err.message;
+        btn.disabled = false;
+      }
     }
 
-    const { data, error } = await supabase
-      .from('users')
-      .insert([{ name, phone: formattedPhone }])
-      .select();
+    function showDashboard(user) {
+      document.getElementById('authSection').style.display = 'none';
+      document.getElementById('successView').style.display = 'none';
+      document.getElementById('dashboardView').style.display = 'block';
 
-    if (error) {
-      return res.status(400).json({ error: error.message });
+      document.getElementById('dashWelcome').textContent = `Hi, ${user.name}`;
+      document.getElementById('dashId').textContent = `#${user.id}`;
+      document.getElementById('dashPhone').textContent = user.phone;
     }
 
-    return res.status(200).json({ success: true, user: data[0] });
-  } catch (err) {
-    return res.status(500).json({ error: err.message });
-  }
-});
-
-// 2. Login Endpoint
-app.post('/api/login', async (req, res) => {
-  try {
-    const { phone } = req.body;
-
-    if (!phone) {
-      return res.status(400).json({ error: 'Phone number is required.' });
+    function logout() {
+      localStorage.removeItem('kaziUser');
+      location.reload();
     }
-
-    const formattedPhone = formatPhoneNumber(phone);
-
-    const { data, error } = await supabase
-      .from('users')
-      .select('*')
-      .eq('phone', formattedPhone)
-      .single();
-
-    if (error || !data) {
-      return res.status(404).json({ error: 'Account not found. Please register first.' });
-    }
-
-    return res.status(200).json({ success: true, user: data });
-  } catch (err) {
-    return res.status(500).json({ error: err.message });
-  }
-});
-
-// 3. Fetch Single User Profile by ID
-app.get('/api/user/:id', async (req, res) => {
-  try {
-    const { id } = req.params;
-    const { data, error } = await supabase
-      .from('users')
-      .select('*')
-      .eq('id', id)
-      .single();
-
-    if (error || !data) {
-      return res.status(404).json({ error: 'User not found' });
-    }
-
-    return res.status(200).json(data);
-  } catch (err) {
-    return res.status(500).json({ error: err.message });
-  }
-});
-
-// 4. Admin Endpoint: Fetch All Users
-app.get('/api/admin/users', async (req, res) => {
-  try {
-    const { data, error } = await supabase
-      .from('users')
-      .select('*')
-      .order('created_at', { ascending: false });
-
-    if (error) {
-      return res.status(400).json({ error: error.message });
-    }
-
-    return res.status(200).json(data);
-  } catch (err) {
-    return res.status(500).json({ error: err.message });
-  }
-});
-
-// Serve frontend index.html
-app.get('*', (req, res) => {
-  res.sendFile(path.join(process.cwd(), 'public', 'index.html'));
-});
-
-module.exports = app;
+  </script>
+</body>
+</html>
