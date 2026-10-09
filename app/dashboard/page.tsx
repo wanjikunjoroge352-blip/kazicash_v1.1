@@ -41,7 +41,14 @@ export default function DashboardPage() {
           <h2 className="text-3xl font-extrabold">
             KES {balance.toFixed(2)}
           </h2>
-        </div>
+                {/* WITHDRAW BUTTON */}
+        <Link
+          href="/dashboard/withdraw"
+          className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3.5 px-4 rounded-2xl text-center block transition shadow-md text-sm my-4"
+        >
+          Withdraw to M-Pesa
+        </Link>
+
 
         {/* MPESA WITHDRAWAL BUTTON */}
         <div className="pt-1 pb-1">
