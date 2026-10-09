@@ -1,102 +1,91 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 
 export default function DashboardPage() {
-  const [balance, setBalance] = useState<number>(55.00);
+  const router = useRouter();
 
-  useEffect(() => {
-    async function fetchBalance() {
-      try {
-        const res = await fetch('/api/user/balance');
-        const data = await res.json();
-        if (data.balance !== undefined) setBalance(data.balance);
-      } catch (e) {
-        console.error('Failed to load balance', e);
-      }
-    }
-    fetchBalance();
-  }, []);
+  const handleSignOut = () => {
+    router.push('/login');
+  };
 
   return (
-    <div className="min-h-screen bg-gray-100 flex items-center justify-center p-4">
-      <div className="bg-white rounded-3xl p-6 max-w-sm w-full shadow-lg space-y-6">
+    <div className="min-h-screen bg-gray-50 flex flex-col items-center justify-center p-4">
+      <div className="bg-white w-full max-w-md rounded-3xl p-6 shadow-sm border border-gray-100">
         
-        {/* Profile Header */}
-        <div className="flex justify-between items-start">
+        {/* Header */}
+        <div className="flex justify-between items-center mb-6">
           <div>
-            <h1 className="text-xl font-bold text-gray-900">Hi, Wanjiku Njoroge</h1>
-            <span className="text-xs font-semibold text-emerald-600 flex items-center gap-1 mt-0.5">
-              <span className="w-2 h-2 rounded-full bg-emerald-500 inline-block"></span>
-              Active Account
+            <h1 className="text-lg font-bold text-gray-900">Hi, Wanjiku Njoroge</h1>
+            <span className="text-xs text-emerald-600 font-medium flex items-center gap-1 mt-0.5">
+              <span className="w-2 h-2 rounded-full bg-emerald-500 inline-block"></span> Active Account
             </span>
           </div>
-          <span className="text-xs font-bold text-gray-400">#12</span>
+          <span className="text-xs font-semibold bg-gray-100 text-gray-600 px-2.5 py-1 rounded-full">
+            #12
+          </span>
         </div>
 
-        {/* Balance Card */}
-        <div className="bg-blue-600 text-white p-5 rounded-2xl shadow-md space-y-1">
-          <p className="text-xs text-blue-100 font-medium">Available Balance</p>
-          <h2 className="text-3xl font-extrabold">
-            KES {balance.toFixed(2)}
-          </h2>
-                {/* WITHDRAW BUTTON */}
-        <Link
-          href="/dashboard/withdraw"
-          className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3.5 px-4 rounded-2xl text-center block transition shadow-md text-sm my-4"
-        >
-          Withdraw to M-Pesa
-        </Link>
+        {/* Available Balance Card */}
+        <div className="bg-blue-600 text-white rounded-2xl p-5 mb-6 shadow-sm">
+          <p className="text-xs text-blue-100 font-medium uppercase tracking-wider">Available Balance</p>
+          <h2 className="text-3xl font-extrabold mt-1">KES 0.00</h2>
+        </div>
 
-
-        {/* MPESA WITHDRAWAL BUTTON */}
-        <div className="pt-1 pb-1">
+        {/* Withdraw to M-Pesa Button (Added here!) */}
+        <div className="mb-6">
           <Link
             href="/dashboard/withdraw"
-            className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-4 px-4 rounded-2xl text-center block transition shadow-md text-base"
+            className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3.5 px-4 rounded-2xl text-center block transition shadow-sm text-sm"
           >
             Withdraw to M-Pesa
           </Link>
         </div>
 
-        {/* Tasks */}
-        <div className="space-y-3">
-          <h3 className="text-sm font-bold text-gray-800">Available Money Tasks</h3>
-
-          <div className="bg-gray-50 p-3.5 rounded-2xl border border-gray-100 flex justify-between items-center">
-            <div>
-              <p className="text-xs font-bold text-gray-800">Market Opinion Survey</p>
-              <p className="text-[11px] text-gray-400">Takes ~3 mins (CPALead)</p>
+        {/* Available Money Tasks */}
+        <div className="mb-6">
+          <h3 className="text-sm font-bold text-gray-900 mb-3">Available Money Tasks</h3>
+          
+          <div className="space-y-3">
+            <div className="flex items-center justify-between p-3.5 bg-gray-50 rounded-2xl border border-gray-100">
+              <div>
+                <p className="text-sm font-semibold text-gray-900">Market Opinion Survey</p>
+                <p className="text-xs text-gray-500 mt-0.5">Takes ~3 mins (CPALead)</p>
+              </div>
+              <span className="bg-emerald-500 text-white text-xs font-bold px-3 py-1.5 rounded-xl shadow-sm">
+                + KES 15
+              </span>
             </div>
-            <span className="bg-emerald-500 text-white text-xs font-bold px-3 py-2 rounded-xl">
-              + KES 15
-            </span>
-          </div>
 
-          <div className="bg-gray-50 p-3.5 rounded-2xl border border-gray-100 flex justify-between items-center">
-            <div>
-              <p className="text-xs font-bold text-gray-800">Watch Partner Video</p>
-              <p className="text-[11px] text-gray-400">30-second ad view</p>
+            <div className="flex items-center justify-between p-3.5 bg-gray-50 rounded-2xl border border-gray-100">
+              <div>
+                <p className="text-sm font-semibold text-gray-900">Watch Partner Video</p>
+                <p className="text-xs text-gray-500 mt-0.5">30-second ad view</p>
+              </div>
+              <span className="bg-emerald-500 text-white text-xs font-bold px-3 py-1.5 rounded-xl shadow-sm">
+                + KES 5
+              </span>
             </div>
-            <span className="bg-emerald-500 text-white text-xs font-bold px-3 py-2 rounded-xl">
-              + KES 5
-            </span>
-          </div>
 
-          <div className="bg-gray-50 p-3.5 rounded-2xl border border-gray-100 flex justify-between items-center">
-            <div>
-              <p className="text-xs font-bold text-gray-800">Invite a Friend</p>
-              <p className="text-[11px] text-gray-400">Share your code</p>
+            <div className="flex items-center justify-between p-3.5 bg-gray-50 rounded-2xl border border-gray-100">
+              <div>
+                <p className="text-sm font-semibold text-gray-900">Invite a Friend</p>
+                <p className="text-xs text-gray-500 mt-0.5">Share your code</p>
+              </div>
+              <span className="bg-emerald-500 text-white text-xs font-bold px-3 py-1.5 rounded-xl shadow-sm">
+                + KES 20
+              </span>
             </div>
-            <span className="bg-emerald-500 text-white text-xs font-bold px-3 py-2 rounded-xl">
-              + KES 20
-            </span>
           </div>
         </div>
 
-        {/* Sign Out */}
-        <button className="w-full bg-red-50 hover:bg-red-100 text-red-500 font-bold py-3 rounded-2xl text-xs transition">
+        {/* Sign Out Button */}
+        <button
+          onClick={handleSignOut}
+          className="w-full bg-red-50 hover:bg-red-100 text-red-600 font-semibold py-3 px-4 rounded-2xl text-center transition text-sm"
+        >
           Sign Out
         </button>
 
@@ -104,12 +93,3 @@ export default function DashboardPage() {
     </div>
   );
 }
-{/* Withdraw Button */}
-<div className="mt-4">
-  <Link
-    href="/dashboard/withdraw"
-    className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3 px-4 rounded-2xl text-center block transition shadow-md text-sm"
-  >
-    Withdraw to M-Pesa
-  </Link>
-</div>
