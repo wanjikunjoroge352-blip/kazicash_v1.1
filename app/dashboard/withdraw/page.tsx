@@ -15,3 +15,10 @@ export default function WithdrawPage() {
   <p>Available Balance</p>
   <h1>KES {balance}</h1>
 </div>
+{/* Withdraw Button */}
+<a
+  href="/dashboard/withdraw"
+  className="w-full mt-3 py-3 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl text-center block transition shadow-sm"
+>
+  Withdraw to M-Pesa
+</a>
