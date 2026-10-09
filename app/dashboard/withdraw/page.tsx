@@ -2,11 +2,16 @@
 
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 
-export default function DashboardPage() {
-  const [balance, setBalance] = useState<number>(0);
+export default function WithdrawPage() {
+  const [balance, setBalance] = useState<number>(55.00);
+  const [phone, setPhone] = useState<string>('');
+  const [amount, setAmount] = useState<string>('');
+  const [loading, setLoading] = useState<boolean>(false);
+  const [message, setMessage] = useState<{ text: string; type: 'success' | 'error' } | null>(null);
+  const router = useRouter();
 
-  // Fetch real balance from API
   useEffect(() => {
     async function fetchBalance() {
       try {
@@ -20,77 +25,109 @@ export default function DashboardPage() {
     fetchBalance();
   }, []);
 
+  const handleWithdraw = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+    setMessage(null);
+
+    const withdrawAmount = parseFloat(amount);
+
+    if (!phone || phone.length < 10) {
+      setMessage({ text: 'Please enter a valid M-Pesa phone number (e.g., 2547XXXXXXXX)', type: 'error' });
+      setLoading(false);
+      return;
+    }
+
+    if (isNaN(withdrawAmount) || withdrawAmount <= 0) {
+      setMessage({ text: 'Please enter a valid withdrawal amount', type: 'error' });
+      setLoading(false);
+      return;
+    }
+
+    if (withdrawAmount > balance) {
+      setMessage({ text: 'Insufficient balance for this withdrawal amount', type: 'error' });
+      setLoading(false);
+      return;
+    }
+
+    try {
+      const res = await fetch('/api/withdraw', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ phone, amount: withdrawAmount }),
+      });
+      const data = await res.json();
+
+      if (res.ok) {
+        setMessage({ text: 'Withdrawal request successful! Check your phone for the M-Pesa prompt.', type: 'success' });
+        setTimeout(() => router.push('/dashboard'), 3000);
+      } else {
+        setMessage({ text: data.error || 'Withdrawal failed. Please try again.', type: 'error' });
+      }
+    } catch (err) {
+      setMessage({ text: 'Network error. Please try again.', type: 'error' });
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gray-100 flex items-center justify-center p-4">
       <div className="bg-white rounded-3xl p-6 max-w-sm w-full shadow-lg space-y-6">
         
-        {/* Profile Header */}
-        <div className="flex justify-between items-start">
+        {/* Header */}
+        <div className="flex justify-between items-center">
+          <h1 className="text-lg font-bold text-gray-900">Withdraw to M-Pesa</h1>
+          <Link href="/dashboard" className="text-xs font-semibold text-blue-600 hover:underline">
+            Back
+          </Link>
+        </div>
+
+        {/* Balance Card Summary */}
+        <div className="bg-blue-600 text-white p-4 rounded-2xl shadow-md space-y-1">
+          <p className="text-xs text-blue-100 font-medium">Available to Withdraw</p>
+          <h2 className="text-2xl font-extrabold">KES {balance.toFixed(2)}</h2>
+        </div>
+
+        {/* Feedback Message */}
+        {message && (
+          <div className={`p-3 rounded-xl text-xs font-medium ${message.type === 'success' ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' : 'bg-red-50 text-red-600 border border-red-200'}`}>
+            {message.text}
+          </div>
+        )}
+
+        {/* Withdrawal Form */}
+        <form onSubmit={handleWithdraw} className="space-y-4">
           <div>
-            <h1 className="text-xl font-bold text-gray-900">Hi, Wanjiku Njoroge</h1>
-            <span className="text-xs font-semibold text-emerald-600 flex items-center gap-1 mt-0.5">
-              <span className="w-2 h-2 rounded-full bg-emerald-500 inline-block"></span>
-              Active Account
-            </span>
-          </div>
-          <span className="text-xs font-bold text-gray-400">#12</span>
-        </div>
-
-        {/* Balance Card */}
-        <div className="bg-blue-600 text-white p-5 rounded-2xl shadow-md space-y-1">
-          <p className="text-xs text-blue-100 font-medium">Available Balance</p>
-          <h2 className="text-3xl font-extrabold">
-            KES {balance.toFixed(2)}
-          </h2>
-        </div>
-
-        {/* GREEN MPESA WITHDRAW BUTTON */}
-        <Link
-          href="/dashboard/withdraw"
-          className="w-full bg-emerald-600 hover:bg-emerald-700 active:bg-emerald-800 text-white font-bold py-3.5 px-4 rounded-2xl text-center block transition shadow-md text-sm"
-        >
-          Withdraw to M-Pesa
-        </Link>
-
-        {/* Tasks */}
-        <div className="space-y-3">
-          <h3 className="text-sm font-bold text-gray-800">Available Money Tasks</h3>
-
-          <div className="bg-gray-50 p-3.5 rounded-2xl border border-gray-100 flex justify-between items-center">
-            <div>
-              <p className="text-xs font-bold text-gray-800">Market Opinion Survey</p>
-              <p className="text-[11px] text-gray-400">Takes ~3 mins (CPALead)</p>
-            </div>
-            <Link href="/dashboard/tasks" className="bg-emerald-500 text-white text-xs font-bold px-3 py-2 rounded-xl">
-              + KES 15
-            </Link>
+            <label className="block text-xs font-bold text-gray-700 mb-1">M-Pesa Phone Number</label>
+            <input
+              type="text"
+              placeholder="2547XXXXXXXX"
+              value={phone}
+              onChange={(e) => setPhone(e.target.value)}
+              className="w-full bg-gray-50 border border-gray-200 rounded-xl py-3 px-4 text-sm text-gray-900 focus:outline-none focus:border-blue-500"
+            />
           </div>
 
-          <div className="bg-gray-50 p-3.5 rounded-2xl border border-gray-100 flex justify-between items-center">
-            <div>
-              <p className="text-xs font-bold text-gray-800">Watch Partner Video</p>
-              <p className="text-[11px] text-gray-400">30-second ad view</p>
-            </div>
-            <Link href="/dashboard/tasks" className="bg-emerald-500 text-white text-xs font-bold px-3 py-2 rounded-xl">
-              + KES 5
-            </Link>
+          <div>
+            <label className="block text-xs font-bold text-gray-700 mb-1">Amount (KES)</label>
+            <input
+              type="number"
+              placeholder="0.00"
+              value={amount}
+              onChange={(e) => setAmount(e.target.value)}
+              className="w-full bg-gray-50 border border-gray-200 rounded-xl py-3 px-4 text-sm text-gray-900 focus:outline-none focus:border-blue-500"
+            />
           </div>
 
-          <div className="bg-gray-50 p-3.5 rounded-2xl border border-gray-100 flex justify-between items-center">
-            <div>
-              <p className="text-xs font-bold text-gray-800">Invite a Friend</p>
-              <p className="text-[11px] text-gray-400">Share your code</p>
-            </div>
-            <Link href="/dashboard/tasks" className="bg-emerald-500 text-white text-xs font-bold px-3 py-2 rounded-xl">
-              + KES 20
-            </Link>
-          </div>
-        </div>
-
-        {/* Sign Out */}
-        <button className="w-full bg-red-50 hover:bg-red-100 text-red-500 font-bold py-3 rounded-2xl text-xs transition">
-          Sign Out
-        </button>
+          <button
+            type="submit"
+            disabled={loading}
+            className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3.5 px-4 rounded-2xl text-center block transition shadow-md text-sm disabled:opacity-50"
+          >
+            {loading ? 'Processing...' : 'Confirm Withdrawal'}
+          </button>
+        </form>
 
       </div>
     </div>
