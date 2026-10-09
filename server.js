@@ -5,19 +5,14 @@ const axios = require('axios');
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// Middleware to parse JSON and urlencoded data
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-
-// Serve static frontend files (like index.html and withdraw.html) from the 'public' folder
 app.use(express.static(path.join(__dirname, 'public')));
 
-// Explicit route for the withdrawal page if accessed via /withdraw
 app.get('/withdraw', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'withdraw.html'));
 });
 
-// Safaricom Daraja STK Push Withdrawal Endpoint
 app.post('/api/withdraw', async (req, res) => {
   const { phone, amount } = req.body;
 
@@ -26,13 +21,11 @@ app.post('/api/withdraw', async (req, res) => {
   }
 
   try {
-    // 1. Credentials from environment variables (or fallback sandbox test credentials)
     const consumerKey = process.env.MPESA_CONSUMER_KEY || 'YOUR_CONSUMER_KEY';
     const consumerSecret = process.env.MPESA_CONSUMER_SECRET || 'YOUR_CONSUMER_SECRET';
-    const shortCode = process.env.MPESA_SHORTCODE || '174379'; // Sandbox default shortcode
-    const passkey = process.env.MPESA_PASSKEY || 'bfb279f9aa9bdbcf158e97dd71a467cd2e0c893059b10f78e6b72ada1ed2c919'; // Sandbox default passkey
+    const shortCode = process.env.MPESA_SHORTCODE || '174379';
+    const passkey = process.env.MPESA_PASSKEY || 'bfb279f9aa9bdbcf158e97dd71a467cd2e0c893059b10f78e6b72ada1ed2c919';
 
-    // 2. Generate Safaricom OAuth Access Token
     const auth = Buffer.from(`${consumerKey}:${consumerSecret}`).toString('base64');
     const tokenResponse = await axios.get(
       'https://sandbox.safaricom.co.ke/oauth/v1/generate?grant_type=client_credentials',
@@ -40,7 +33,6 @@ app.post('/api/withdraw', async (req, res) => {
     );
     const accessToken = tokenResponse.data.access_token;
 
-    // 3. Prepare STK Push payload
     const date = new Date();
     const timestamp =
       date.getFullYear().toString() +
@@ -52,7 +44,6 @@ app.post('/api/withdraw', async (req, res) => {
 
     const password = Buffer.from(`${shortCode}${passkey}${timestamp}`).toString('base64');
 
-    // Format phone number to ensure it starts with 254
     let formattedPhone = phone.toString().trim();
     if (formattedPhone.startsWith('0')) {
       formattedPhone = '254' + formattedPhone.slice(1);
@@ -69,12 +60,11 @@ app.post('/api/withdraw', async (req, res) => {
       PartyA: formattedPhone,
       PartyB: shortCode,
       PhoneNumber: formattedPhone,
-      CallBackURL: 'https://mydomain.com/api/callback', // Replace with your live Vercel domain callback route if needed
+      CallBackURL: 'https://mydomain.com/api/callback',
       AccountReference: 'KaziCash',
       TransactionDesc: 'KaziCash Withdrawal'
     };
 
-    // 4. Send Request to Daraja API
     const stkResponse = await axios.post(
       'https://sandbox.safaricom.co.ke/mpesa/stkpush/v1/processrequest',
       stkPayload,
@@ -90,11 +80,16 @@ app.post('/api/withdraw', async (req, res) => {
   } catch (error) {
     console.error('Daraja Error:', error.response?.data || error.message);
     return res.status(500).json({
-      error: 'Failed to process M-Pesa withdrawal. Check server logs or credentials.'
+      error: 'Failed to process M-Pesa withdrawal.'
     });
   }
 });
 
-app.listen(PORT, () => {
-  console.log(`Server is running on port ${PORT}`);
-});
+if (process.env.NODE_ENV !== 'production') {
+  app.listen(PORT, () => {
+    console.log(`Server is running on port ${PORT}`);
+  });
+}
+
+module.exports = app;
+
