@@ -11,3 +11,7 @@ export default function WithdrawPage() {
     </main>
   );
 }
+<div className="bg-blue-600 ...">
+  <p>Available Balance</p>
+  <h1>KES {balance}</h1>
+</div>
