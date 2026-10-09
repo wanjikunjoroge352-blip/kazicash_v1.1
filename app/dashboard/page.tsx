@@ -104,3 +104,12 @@ export default function DashboardPage() {
     </div>
   );
 }
+{/* Withdraw Button */}
+<div className="mt-4">
+  <Link
+    href="/dashboard/withdraw"
+    className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3 px-4 rounded-2xl text-center block transition shadow-md text-sm"
+  >
+    Withdraw to M-Pesa
+  </Link>
+</div>
