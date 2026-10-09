@@ -170,3 +170,16 @@ export default function HomePage() {
     </div>
   );
 }
+{/* Balance Card */}
+<div className="bg-blue-600 text-white p-5 rounded-2xl shadow-md">
+  <p className="text-xs text-blue-100 font-medium">Available Balance</p>
+  <h2 className="text-3xl font-extrabold mt-1">KES {balance.toLocaleString()}</h2>
+</div>
+
+{/* ADD THIS GREEN WITHDRAW BUTTON DIRECTLY BELOW */}
+<a
+  href="/dashboard/withdraw"
+  className="w-full mt-3 py-3.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-2xl text-center block transition shadow-md text-sm"
+>
+  Withdraw to M-Pesa
+</a>
