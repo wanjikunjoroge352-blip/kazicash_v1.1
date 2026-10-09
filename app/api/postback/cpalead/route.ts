@@ -79,3 +79,60 @@ export async function GET(request: Request) {
     return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
   }
 }
+import { NextResponse } from 'next/server';
+import { createClient } from '@supabase/supabase-js';
+
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
+const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
+const supabase = createClient(supabaseUrl, supabaseServiceKey);
+
+export async function POST(request: Request) {
+  try {
+    const { userId, amountKes, phoneNumber } = await request.json();
+
+    if (!userId || !amountKes || !phoneNumber) {
+      return NextResponse.json({ error: 'Missing required parameters' }, { status: 400 });
+    }
+
+    // Minimum withdrawal threshold (e.g., 50 KES)
+    if (amountKes < 50) {
+      return NextResponse.json({ error: 'Minimum withdrawal is KES 50' }, { status: 400 });
+    }
+
+    // Check user balance
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('balance')
+      .eq('id', userId)
+      .single();
+
+    if (!profile || profile.balance < amountKes) {
+      return NextResponse.json({ error: 'Insufficient balance' }, { status: 400 });
+    }
+
+    // Deduct balance and record withdrawal request
+    const { error: deductError } = await supabase.rpc('increment_user_balance', {
+      user_id_input: userId,
+      amount_input: -amountKes,
+    });
+
+    if (deductError) {
+      return NextResponse.json({ error: 'Failed to process balance deduction' }, { status: 500 });
+    }
+
+    // Record request in DB
+    await supabase.from('withdrawals').insert([
+      {
+        user_id: userId,
+        phone_number: phoneNumber,
+        amount_kes: amountKes,
+        status: 'pending',
+      },
+    ]);
+
+    return NextResponse.json({ success: true, message: 'Withdrawal request submitted successfully' });
+  } catch (error) {
+    console.error('Withdrawal error:', error);
+    return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
+  }
+}
