@@ -3,7 +3,7 @@
 import React, { useState } from 'react';
 import Link from 'next/link';
 
-export default function Home() {
+export default function DashboardPage() {
   const [balance, setBalance] = useState(17720.00);
 
   return (
@@ -22,21 +22,23 @@ export default function Home() {
           <span className="text-xs font-bold text-gray-400">#12</span>
         </div>
 
-        {/* Balance Card */}
-        <div className="bg-blue-600 text-white p-5 rounded-2xl shadow-md space-y-1">
-          <p className="text-xs text-blue-100 font-medium">Available Balance</p>
-          <h2 className="text-3xl font-extrabold">
-            KES {balance.toLocaleString('en-US', { minimumFractionDigits: 2 })}
-          </h2>
-        </div>
+        {/* Balance Card + Green Withdraw Button */}
+        <div className="space-y-3">
+          <div className="bg-blue-600 text-white p-5 rounded-2xl shadow-md">
+            <p className="text-xs text-blue-100 font-medium">Available Balance</p>
+            <h2 className="text-3xl font-extrabold mt-1">
+              KES {balance.toLocaleString('en-US', { minimumFractionDigits: 2 })}
+            </h2>
+          </div>
 
-        {/* GREEN WITHDRAW BUTTON */}
-        <Link
-          href="/dashboard/withdraw"
-          className="w-full bg-emerald-600 hover:bg-emerald-700 active:bg-emerald-800 text-white font-bold py-3.5 px-4 rounded-2xl text-center block transition shadow-md text-sm"
-        >
-          Withdraw to M-Pesa
-        </Link>
+          {/* GREEN M-PESA WITHDRAW BUTTON */}
+          <Link
+            href="/dashboard/withdraw"
+            className="w-full bg-emerald-600 hover:bg-emerald-700 active:bg-emerald-800 text-white font-bold py-3.5 px-4 rounded-2xl text-center block transition shadow-md text-sm"
+          >
+            Withdraw to M-Pesa
+          </Link>
+        </div>
 
         {/* Available Tasks */}
         <div className="space-y-3">
