@@ -43,13 +43,15 @@ export default function DashboardPage() {
           </h2>
         </div>
 
-        {/* WITHDRAW BUTTON */}
-        <Link
-          href="/dashboard/withdraw"
-          className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3.5 px-4 rounded-2xl text-center block transition shadow-md text-sm"
-        >
-          Withdraw to M-Pesa
-        </Link>
+        {/* MPESA WITHDRAWAL BUTTON */}
+        <div className="pt-1 pb-1">
+          <Link
+            href="/dashboard/withdraw"
+            className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-4 px-4 rounded-2xl text-center block transition shadow-md text-base"
+          >
+            Withdraw to M-Pesa
+          </Link>
+        </div>
 
         {/* Tasks */}
         <div className="space-y-3">
