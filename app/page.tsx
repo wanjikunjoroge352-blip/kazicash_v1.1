@@ -1,4 +1,4 @@
-'use client';
+I'use client';
 
 import React, { useState } from 'react';
 import Link from 'next/link';
@@ -82,3 +82,4 @@ export default function Home() {
     </div>
   );
 }
+// deploy refresh
