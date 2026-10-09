@@ -1,10 +1,23 @@
-I'use client';
+'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 
-export default function Home() {
-  const [balance, setBalance] = useState(17720.00);
+export default function DashboardPage() {
+  const [balance, setBalance] = useState<number>(55.00);
+
+  useEffect(() => {
+    async function fetchBalance() {
+      try {
+        const res = await fetch('/api/user/balance');
+        const data = await res.json();
+        if (data.balance !== undefined) setBalance(data.balance);
+      } catch (e) {
+        console.error('Failed to load balance', e);
+      }
+    }
+    fetchBalance();
+  }, []);
 
   return (
     <div className="min-h-screen bg-gray-100 flex items-center justify-center p-4">
@@ -22,23 +35,23 @@ export default function Home() {
           <span className="text-xs font-bold text-gray-400">#12</span>
         </div>
 
-        {/* Available Balance Card */}
+        {/* Balance Card */}
         <div className="bg-blue-600 text-white p-5 rounded-2xl shadow-md space-y-1">
           <p className="text-xs text-blue-100 font-medium">Available Balance</p>
           <h2 className="text-3xl font-extrabold">
-            KES {balance.toLocaleString('en-US', { minimumFractionDigits: 2 })}
+            KES {balance.toFixed(2)}
           </h2>
         </div>
 
-        {/* GREEN WITHDRAW BUTTON */}
+        {/* WITHDRAW BUTTON */}
         <Link
           href="/dashboard/withdraw"
-          className="w-full bg-emerald-600 hover:bg-emerald-700 active:bg-emerald-800 text-white font-bold py-3.5 px-4 rounded-2xl text-center block transition shadow-md text-sm"
+          className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3.5 px-4 rounded-2xl text-center block transition shadow-md text-sm"
         >
           Withdraw to M-Pesa
         </Link>
 
-        {/* Money Tasks */}
+        {/* Tasks */}
         <div className="space-y-3">
           <h3 className="text-sm font-bold text-gray-800">Available Money Tasks</h3>
 
@@ -47,9 +60,9 @@ export default function Home() {
               <p className="text-xs font-bold text-gray-800">Market Opinion Survey</p>
               <p className="text-[11px] text-gray-400">Takes ~3 mins (CPALead)</p>
             </div>
-            <Link href="/dashboard/tasks" className="bg-emerald-500 text-white text-xs font-bold px-3 py-2 rounded-xl">
+            <span className="bg-emerald-500 text-white text-xs font-bold px-3 py-2 rounded-xl">
               + KES 15
-            </Link>
+            </span>
           </div>
 
           <div className="bg-gray-50 p-3.5 rounded-2xl border border-gray-100 flex justify-between items-center">
@@ -57,9 +70,9 @@ export default function Home() {
               <p className="text-xs font-bold text-gray-800">Watch Partner Video</p>
               <p className="text-[11px] text-gray-400">30-second ad view</p>
             </div>
-            <Link href="/dashboard/tasks" className="bg-emerald-500 text-white text-xs font-bold px-3 py-2 rounded-xl">
+            <span className="bg-emerald-500 text-white text-xs font-bold px-3 py-2 rounded-xl">
               + KES 5
-            </Link>
+            </span>
           </div>
 
           <div className="bg-gray-50 p-3.5 rounded-2xl border border-gray-100 flex justify-between items-center">
@@ -67,9 +80,9 @@ export default function Home() {
               <p className="text-xs font-bold text-gray-800">Invite a Friend</p>
               <p className="text-[11px] text-gray-400">Share your code</p>
             </div>
-            <Link href="/dashboard/tasks" className="bg-emerald-500 text-white text-xs font-bold px-3 py-2 rounded-xl">
+            <span className="bg-emerald-500 text-white text-xs font-bold px-3 py-2 rounded-xl">
               + KES 20
-            </Link>
+            </span>
           </div>
         </div>
 
@@ -82,4 +95,3 @@ export default function Home() {
     </div>
   );
 }
-// deploy refresh
