@@ -34,7 +34,7 @@ export default function DashboardPage() {
           <h2 className="text-3xl font-extrabold mt-1">KES 0.00</h2>
         </div>
 
-        {/* Withdraw to M-Pesa Button (Added here!) */}
+        {/* Withdraw to M-Pesa Button */}
         <div className="mb-6">
           <Link
             href="/dashboard/withdraw"
