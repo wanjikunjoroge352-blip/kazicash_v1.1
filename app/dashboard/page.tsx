@@ -4,13 +4,13 @@ import React, { useState } from 'react';
 import Link from 'next/link';
 
 export default function DashboardPage() {
-  const [balance, setBalance] = useState(17720.00);
+  const [balance, setBalance] = useState(17780.00);
 
   return (
     <div className="min-h-screen bg-gray-100 flex items-center justify-center p-4">
       <div className="bg-white rounded-3xl p-6 max-w-sm w-full shadow-lg space-y-6">
         
-        {/* User Profile Header */}
+        {/* Profile Header */}
         <div className="flex justify-between items-start">
           <div>
             <h1 className="text-xl font-bold text-gray-900">Hi, Wanjiku Njoroge</h1>
@@ -22,25 +22,23 @@ export default function DashboardPage() {
           <span className="text-xs font-bold text-gray-400">#12</span>
         </div>
 
-        {/* Balance Card + Green Withdraw Button */}
-        <div className="space-y-3">
-          <div className="bg-blue-600 text-white p-5 rounded-2xl shadow-md">
-            <p className="text-xs text-blue-100 font-medium">Available Balance</p>
-            <h2 className="text-3xl font-extrabold mt-1">
-              KES {balance.toLocaleString('en-US', { minimumFractionDigits: 2 })}
-            </h2>
-          </div>
-
-          {/* GREEN M-PESA WITHDRAW BUTTON */}
-          <Link
-            href="/dashboard/withdraw"
-            className="w-full bg-emerald-600 hover:bg-emerald-700 active:bg-emerald-800 text-white font-bold py-3.5 px-4 rounded-2xl text-center block transition shadow-md text-sm"
-          >
-            Withdraw to M-Pesa
-          </Link>
+        {/* Balance Card */}
+        <div className="bg-blue-600 text-white p-5 rounded-2xl shadow-md space-y-1">
+          <p className="text-xs text-blue-100 font-medium">Available Balance</p>
+          <h2 className="text-3xl font-extrabold">
+            KES {balance.toLocaleString('en-US', { minimumFractionDigits: 2 })}
+          </h2>
         </div>
 
-        {/* Available Tasks */}
+        {/* GREEN WITHDRAW BUTTON */}
+        <Link
+          href="/dashboard/withdraw"
+          className="w-full bg-emerald-600 hover:bg-emerald-700 active:bg-emerald-800 text-white font-bold py-3.5 px-4 rounded-2xl text-center block transition shadow-md text-sm"
+        >
+          Withdraw to M-Pesa
+        </Link>
+
+        {/* Money Tasks */}
         <div className="space-y-3">
           <h3 className="text-sm font-bold text-gray-800">Available Money Tasks</h3>
 
