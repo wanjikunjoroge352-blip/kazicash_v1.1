@@ -1,14 +1,18 @@
 const express = require('express');
 const path = require('path');
+const { createClient } = require('@supabase/supabase-js');
+
 const app = express();
 
-// Middleware to parse JSON bodies
-app.use(express.json());
+// Initialize Supabase client using environment variables
+const supabaseUrl = process.env.SUPABASE_URL;
+const supabaseKey = process.env.SUPABASE_ANON_KEY;
+const supabase = createClient(supabaseUrl, supabaseKey);
 
-// Serve static files from the 'public' folder (serves index.html, withdraw.html, etc.)
+app.use(express.json());
 app.use(express.static(path.join(__dirname, 'public')));
 
-// M-Pesa Withdrawal API Endpoint
+// Example Withdrawal Route with Supabase logging
 app.post('/api/withdraw', async (req, res) => {
   const { phone, amount } = req.body;
 
@@ -17,26 +21,26 @@ app.post('/api/withdraw', async (req, res) => {
   }
 
   try {
-    // TODO: Add your Daraja API STK Push logic here
-    console.log(`Processing withdrawal of KES ${amount} for ${phone}`);
-    
-    // Simulate successful response for now
-    return res.status(200).json({ success: true, message: 'STK Push sent successfully!' });
-  } catch (error) {
-    console.error('Daraja API Error:', error);
-    return res.status(500).json({ error: 'Internal server error during withdrawal.' });
+    // Example: Save withdrawal request to a Supabase table named 'withdrawals'
+    const { data, error } = await supabase
+      .from('withdrawals')
+      .insert([{ phone, amount, status: 'pending' }]);
+
+    if (error) {
+      console.error('Supabase Error:', error.message);
+      return res.status(500).json({ error: 'Failed to save withdrawal request.' });
+    }
+
+    return res.status(200).json({ success: true, message: 'Withdrawal request submitted successfully!', data });
+  } catch (err) {
+    console.error('Server Error:', err);
+    return res.status(500).json({ error: 'Internal server error.' });
   }
 });
 
-// Fallback route to serve index.html for any other frontend navigation
+// Fallback route
 app.get('*', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
-
-// Export app for Vercel serverless deployment (and support local testing if needed)
-if (process.env.NODE_ENV !== 'production') {
-  const PORT = process.env.PORT || 3000;
-  app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
-}
 
 module.exports = app;
