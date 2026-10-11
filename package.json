@@ -1,6 +1,10 @@
+
 {
   "name": "kazicash",
-  "version": "1.1.0",
+  "version": "1.0.0",
+  "scripts": {
+    "build": "echo 'No build required'"
+  },
   "dependencies": {
     "@supabase/supabase-js": "^2.0.0"
   }
