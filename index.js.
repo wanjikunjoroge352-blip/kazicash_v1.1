@@ -1,45 +1,4 @@
-const path = require('path');
-const express = require('express');
-const { createClient } = require('@supabase/supabase-js');
 
-const app = express();
+import app from "../server.js";
 
-const supabase = createClient(
-  process.env.SUPABASE_URL,
-  process.env.SUPABASE_ANON_KEY
-);
-
-app.use(express.json());
-app.use(express.static(path.join(__dirname, 'public')));
-
-app.post('/api/withdraw', async (req, res) => {
-  const { phone, amount } = req.body;
-
-  if (!phone || !amount) {
-    return res.status(400).json({ error: 'Phone number and amount are required.' });
-  }
-
-  try {
-    const { data, error } = await supabase
-      .from('withdrawals')
-      .insert([{ phone, amount, status: 'pending' }]);
-
-    if (error) {
-      return res.status(500).json({ error: error.message });
-    }
-
-    return res.status(200).json({ 
-      success: true, 
-      message: 'Withdrawal request submitted successfully!', 
-      data 
-    });
-  } catch (err) {
-    return res.status(500).json({ error: 'Internal server error.' });
-  }
-});
-
-app.get('*', (req, res) => {
-  res.sendFile(path.join(__dirname, 'public', 'index.html'));
-});
-
-module.exports = app;
+export default app;
