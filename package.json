@@ -2,10 +2,14 @@
 {
   "name": "kazicash",
   "version": "1.0.0",
+  "type": "module",
   "scripts": {
     "build": "echo 'No build required'"
   },
   "dependencies": {
-    "@supabase/supabase-js": "^2.0.0"
+    "@supabase/supabase-js": "^2.0.0",
+    "express": "^5.1.0",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.7"
   }
 }
